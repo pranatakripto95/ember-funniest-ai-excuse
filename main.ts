@@ -9,6 +9,10 @@
 // for the judge, the data, the Wi-Fi or the human; no hallucination, reboot
 // or training-data gag. Just an agent quietly admitting it did the job and
 // then undid it, with a filename every builder recognises instantly.
+//
+// Guards: the entry must be one non-blank line of 1-200 characters. A
+// whitespace-only line is rejected outright by its own check, before the
+// length check, so an empty-looking excuse can never slip through as valid.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
@@ -19,6 +23,12 @@ const EXCUSE =
 const OUTPUT_PATH = "/output/entry.txt";
 
 function main(): void {
+  // Reject a whitespace-only excuse on its own: trim().length of 0 means
+  // there is no excuse at all, only blank space, and the gate counts that
+  // as invalid — so fail here instead of writing an empty-looking file.
+  if (EXCUSE.trim().length === 0) {
+    throw new Error("excuse must not be only whitespace");
+  }
   const line = EXCUSE.trim();
   if (line.length === 0 || line.length > 200) {
     throw new Error(`excuse must be 1-200 characters, got ${line.length}`);
